@@ -1,0 +1,2414 @@
+---
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    css: ..\..\..\..\..\Common\Toolbox\src\R\Reporting\crpReport.css
+    smart: true
+    self_contained: true
+params: 
+    set_title: "Simulation Summary"
+title: "`r params$set_title`"
+---
+
+# Data {.tabset .tabset-fade}
+
+## Missing Derived
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+```			
+
+## Missing Prices
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+```				
+
+# Portfolio Summary {.tabset .tabset-fade}
+
+## Leverage
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>%
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "long"),
+		"period_dt", 
+		simulationIDs, 
+		yMinimum = 0, 
+		title = "Long Leverage"
+) 
+```				
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "short"),
+		"period_dt", 
+		simulationIDs, 
+		yMaximum = 0, 
+		title = "Short Leverage"
+) 
+```				
+
+## Names
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "n"),
+		"period_dt", 
+		simulationIDs, 
+		yMinimum = 0, 
+		title = "Number of Names"
+) 
+```				
+	
+## Eff Names
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "n_effective"),
+		"period_dt", 
+		simulationIDs, 
+		yMinimum = 0, 
+		title = "Effective Number of Names"
+) 
+```				
+	
+## Position Weight
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "min_active"),
+		"period_dt", 
+		simulationIDs, 
+		yMaximum = 0, 
+		title = "Minimum Active Position Weight"
+)
+```				
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "max_active"),
+		"period_dt", 
+		simulationIDs, 
+		yMinimum = 0, 
+		title = "Maximum Active Position Weight"
+)  
+```				
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "min"),
+		"period_dt", 
+		simulationIDs, 
+		yMaximum = 0, 
+		title = "Minimum Position Weight"
+)
+```				
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$summary %>%
+				dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt ~ simulation_id, value.var = "max"),
+		"period_dt", 
+		simulationIDs, 
+		yMinimum = 0, 
+		title = "Maximum Position Weight"
+)  
+```				
+
+# Optimization Summary {.tabset .tabset-fade}
+
+## Status
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+	statusColors <- c(
+			"SolutionFound" = "#2ca02c",
+			"RelaxedSolutionFound" = "#EB471B",
+			"NoSolutionFound" = "firebrick3",
+			"BaseProblemHasNoSolution" = "magenta",
+			"NoLicense" = "gold1",
+			"InternalError" = "cyan2"
+	)
+	
+	ggplot2::ggplot(simulationSummary$opt$optSolution$status,
+					ggplot2::aes(x = .data[["period_dt"]], y = 1, fill = .data[["status"]])) +
+			ggplot2::geom_bar(position = "fill", stat = "identity") +
+			ggplot2::facet_wrap(~ simulation_id, ncol = 1, strip.position = "left") +
+			ggplot2::scale_fill_manual(values = statusColors) +
+			ggplot2::theme(axis.text.y = ggplot2::element_blank(),
+					axis.ticks.y = ggplot2::element_blank(),
+					axis.title.y = ggplot2::element_blank(),
+					legend.position = "bottom", 
+					legend.direction = "horizontal",
+			        panel.spacing = ggplot2::unit(0, "lines"),
+			        strip.background = ggplot2::element_blank(),
+			        panel.border = ggplot2::element_blank(),
+			        panel.background = ggplot2::element_blank()
+			)
+```
+
+## Objective
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$optSolution$objective,
+		"period_dt",
+		"final_objective_value",
+		colorVariable = "simulation_id",
+		title = "Final Values of Objective Function"
+)
+```				
+
+## Objective Terms
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(simulationSummary$opt$optSolution$objTerms) > 0) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$optSolution$objTerms,
+			"period_dt",
+			"final_value_weighted",
+			colorVariable = "simulation_id",
+			facetVariable = "objective_term_id",
+			title = "Final Values of Objective Function Term"
+	)
+}
+```				
+
+## Objective Terms Scaled
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(simulationSummary$opt$optSolution$objTerms) > 0) {
+	Toolbox.plotTimeSeries(
+		simulationSummary$opt$optSolution$objTerms,
+		"period_dt",
+		"final_value_weighted",
+		colorVariable = "simulation_id",
+		facetVariable = "objective_term_id",
+		facetScale = "free_y",
+		title = "Final Values of Objective Function Term"
+	)
+}
+```				
+
+## Total Risk
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(simulationSummary$opt$optSolution$risk) > 0) {
+	Toolbox.plotTimeSeries(
+		simulationSummary$opt$optSolution$risk,
+		"period_dt",
+		"total",
+		colorVariable = "simulation_id",
+		facetVariable = "risk_model_id",
+		facetScale = "free_y",
+		title = "Total Risk"
+	)
+}
+```				
+
+## Elapsed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(simulationSummary$opt$optSummary) > 0) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$optSummary,
+			"period_dt",
+			"elapsed",
+			colorVariable = "simulation_id",
+			title = "Elapsed Optimization Time"
+	)
+}
+```
+
+# Return Summary {.tabset .tabset-fade}
+
+## Active Return
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "active_return"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Active Return",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Total Return
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "return_annualized"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Total Compounded Return",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```	
+
+## Mean Return
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "mean_annualized"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Mean Return",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```	
+
+## Tracking Error
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "tracking_error"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Tracking Error",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```	
+
+## Std Dev
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "std_dev_annualized"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Standard Deviation",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Sharpe Ratio
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "sharpe_ratio_annualized"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		labelValues = TRUE,
+		labelValueFormat = scales::number_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Sharpe Ratio",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Information Ratio
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						stat %in% "information_ratio"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		labelValues = TRUE,
+		labelValueFormat = scales::number_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Annualized Information Ratio",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```					
+
+## Relative Risk Reduction
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id %in% c("portfolio", "portfolio_adj") &
+						stat %in% "total_risk_reduction"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Relative Risk Reduction",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```
+
+## Beta
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id %in% c("portfolio", "portfolio_adj") &
+						stat %in% c("capm_beta", "capm_beta_bear", "capm_beta_bull")
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "stat",
+		rowVariable = "return_variable_id",
+		labelValues = TRUE,
+		labelValueFormat = scales::number_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Market Beta",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Alpha
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id %in% c("portfolio", "portfolio_adj", "lagged_portfolio") &
+						stat %in% "capm_jensen_alpha"
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "return_variable_id",
+		yFormat = scales::percent_format(.01),
+		labelValues = TRUE,
+		labelValueFormat = scales::percent_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Jensen's Alpha",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Capture
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id %in% c("portfolio", "portfolio_adj", "lagged_portfolio") &
+						stat %in% c("up_capture", "down_capture")
+				),
+		"simulation_id",
+		"statistic",
+		colorVariable = "stat",
+		rowVariable = "return_variable_id",
+		labelValues = TRUE,
+		labelValueFormat = scales::number_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Capture",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Drawdown Summary
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE} 
+Toolbox.plotChart(
+		simulationSummary$opt$returnSummary$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id == "portfolio" &
+						stat %in% c("average_drawdown", "average_length", "average_recovery")
+				),
+		"simulation_id",
+		"statistic",
+		rowVariable = "stat",
+		facetScale = "free_y",
+		labelValues = TRUE,
+		labelValueFormat = scales::number_format(.01),
+		xAxisRotateLabels = TRUE, 
+		title = "Drawdown Overview",
+		footnote = glue::glue("returnVariableID: {returnVariableID}")
+)
+```			
+
+## Drawdowns
+
+```{r ft.align = 'left', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = TRUE}
+		# TODO: Alternate background colors of different simulations
+		# TODO: Better date formatting
+		# TODO: Time series chart with drawdowns labeled
+
+		paramTable <- simulationSummary$opt$returnSummary$drawdowns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == returnVariableID &
+						return_variable_id == "portfolio"
+				) %>%
+				dplyr::mutate(
+						simulation_id = factor(
+								simulation_id, 
+								levels = simulationIDs
+						)
+				) %>%
+				dplyr::arrange(simulation_id, from) %>%
+				flextable::regulartable(col_keys = c("simulation_id", "from", "through", "to", "depth", "length", "to_trough", "recovery")) %>%
+				flextable::set_formatter(
+						depth = function(x) sprintf("%.02f%%", x * 100)						
+				) %>%
+				flextable::theme_booktabs() %>%
+				flextable::fontsize(size = 10, part = "all") %>%
+				flextable::padding(padding = 1, part = "all")
+		
+		prettyWidths <- flextable::dim_pretty(paramTable, part = "all")$widths
+		
+		for(j in seq_along(prettyWidths)) {
+			paramTable <- paramTable %>% flextable::width(j = j, prettyWidths[j] + .1)		
+		}
+		
+		paramTable
+		
+```
+	
+# Returns {.tabset .tabset-fade}
+
+## Rolling Average - Total
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		c("portfolio_ma", "benchmark_ma", "market_ma"),
+		facetVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		title = "USD Returns Rolling Average",
+		footnote = "Annualzed"
+)
+```
+
+## Rolling Average - Active
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+		Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		"active_ma",
+		colorVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		yOriginLine = TRUE,
+		timeReferenceValues = timeReferenceValues,
+		timeReferenceLabels = timeReferenceLabels,		
+		title = "USD Active Returns Rolling Average",
+		footnote = "Annualzed"
+)
+```
+
+## Rolling Std Dev - Total
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		c("portfolio_sd", "benchmark_sd", "market_sd"),
+		facetVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		title = "USD Returns Rolling Std Dev",
+		footnote = "Annualzed"
+)
+```
+
+## Rolling Std Dev - Active
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+		Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		"active_sd",
+		colorVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		timeReferenceValues = timeReferenceValues,
+		timeReferenceLabels = timeReferenceLabels,		
+		title = "USD Active Returns Rolling Std Dev",
+		footnote = "Annualzed"
+)
+```
+
+## Rolling Information Ratio
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+		Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		"active_sr",
+		colorVariable = "simulation_id",
+		timeReferenceValues = timeReferenceValues,
+		timeReferenceLabels = timeReferenceLabels,		
+		title = "USD Active Returns Rolling Information Ratio",
+		footnote = "Annualzed"
+)
+```
+
+## Rolling Sharpe Ratio
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+		Toolbox.plotTimeSeries(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"period_dt", 
+		"portfolio_sr",
+		colorVariable = "simulation_id",
+		timeReferenceValues = timeReferenceValues,
+		timeReferenceLabels = timeReferenceLabels,		
+		title = "USD Totals Returns Rolling Sharpe Ratio",
+		footnote = "Annualzed"
+)
+```
+
+# Return Betas {.tabset .tabset-fade}
+
+## Returns vs. Market
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotScatter(
+		simulationSummary$opt$returns %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id == "market_totalreturn_usd"
+				),
+		"market",
+		"portfolio",
+		facetVariable = "simulation_id",
+		linearFit = TRUE,		
+		displayFitParameters = TRUE,
+		xOriginLine = TRUE,
+		yOriginLine = TRUE,
+		title = "Portfolio vs. Market Returns"
+)
+```
+
+## Rolling Betas
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$opt$returnSummary$loadings$rollingLoadings)) {		
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$returnSummary$loadings$rollingLoadings %>%
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+							variable_id == "market_totalreturn_usd" & 
+							loading_variable_id != "intercept" & 
+							return_variable_id == "portfolio"
+					),
+			"period_dt",
+			"loading",
+			colorVariable = "simulation_id",
+			facetVariable = "loading_variable_id",
+			timeReferenceValues = timeReferenceValues,
+			timeReferenceLabels = timeReferenceLabels,		
+			title = "Realized Portfolio Return Loadings (Betas)"
+	)
+}
+```
+	
+# ex-Ante Risk Summary
+
+## Solution {.tabset .tabset-fade}
+
+### Solution - Total
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+# solution risks
+
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$risk$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						type == "managed"
+				),
+		"period_dt",
+		"trisk",
+		colorVariable = "risk_model_id",
+		rowVariable = "currency",
+		columnVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		title = glue::glue("ex-Ante Total Risk")
+)
+```
+
+### Solution - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$risk$summary %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						type == "active"
+				),
+		"period_dt",
+		"trisk",
+		colorVariable = "risk_model_id",
+		rowVariable = "currency",
+		columnVariable = "simulation_id",
+		yFormat = scales::percent_format(.01),
+		title = glue::glue("ex-Ante Active Risk")
+)
+
+```
+
+### Solution - by Type
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+
+for(simulationID in simulationIDs) {
+	print(Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$risk$summary %>%
+					dplyr::filter(simulation_id == simulationID),
+			"period_dt",
+			"trisk",
+			columnVariable = "risk_model_id",
+			rowVariable = "currency",
+			colorVariable = "type",
+			yFormat = scales::percent_format(.01),
+			title = glue::glue("ex-Ante Active Risk by Type: {simulationID}")
+		)
+	)
+}
+```
+
+### Solution - Total Risk
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+    Toolbox.plotTimeSeries(
+    		simulationSummary$opt$solution$risk$summary %>%
+    				dplyr::filter(type == "managed"),
+    		"period_dt",
+    		"trisk",
+    		colorVariable = "simulation_id",
+    		facetVariable = "risk_model_id",
+    		yMinimum = 0,
+    		title = "ex-Ante Managed Total Risk by Simulation"
+    )
+```
+
+### Solution - Factor Risk
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+    Toolbox.plotTimeSeries(
+    		simulationSummary$opt$solution$risk$summary %>%
+    				dplyr::filter(type == "managed"),
+    		"period_dt",
+    		"frisk",
+    		colorVariable = "simulation_id",
+    		facetVariable = "risk_model_id",
+    		yMinimum = 0,
+    		title = "ex-Ante Managed Factor Risk by Simulation"
+    )
+```
+
+### Solution - Spec Risk
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+    Toolbox.plotTimeSeries(
+    		simulationSummary$opt$solution$risk$summary %>%
+    				dplyr::filter(type == "managed"),
+    		"period_dt",
+    		"srisk",
+    		colorVariable = "simulation_id",
+    		facetVariable = "risk_model_id",
+    		yMinimum = 0,
+    		title = "ex-Ante Managed Specific Risk by Simulation"
+    )
+```
+
+## Minimum Variance {.tabset .tabset-fade}
+
+### Min Var
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+
+# minvar risks
+if(!is.null(simulationSummary$minvar$solution$risk$summary)) {
+	minVarCurrencies <- unique(simulationSummary$minvar$solution$risk$summary$currency)
+	
+	for(minVarCurrency in minVarCurrencies) {
+		riskPlot <- Toolbox.plotTimeSeries(
+				simulationSummary$minvar$solution$risk$summary %>%
+						dplyr::filter(
+								simulation_id %in% simulationIDs &
+								currency == minVarCurrency
+						),
+				"period_dt",
+				"trisk",
+				columnVariable = "risk_model_id",
+				rowVariable = "minvar_risk_model_id",
+				colorVariable = "type",
+				yFormat = scales::percent_format(.01),
+				title = glue::glue("ex-Ante Minimum Variance Risk by Type ({minVarCurrency})")
+		)
+		
+		print(riskPlot)
+	}
+}
+
+```
+
+### Min Var - Comparison
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+
+if(!is.null(simulationSummary$minvar$solution$risk$summary) && nrow(simulationSummary$minvar$solution$risk$summary) > 0) {
+	riskComparison <-
+			simulationSummary$minvar$solution$risk$summary %>%
+			dplyr::filter(simulation_id %in% simulationIDs) %>%
+			Toolbox.pivotWide(
+					c("period_dt", "simulation_id", "minvar_risk_model_id", "risk_model_id", "currency"),
+					"type", 
+					"trisk"
+			) %>%
+			dplyr::left_join(
+					simulationSummary$opt$solution$risk$summary %>%
+							Toolbox.pivotWide(
+									c("period_dt", "simulation_id", "risk_model_id", "currency"),
+									"type", 
+									"trisk"
+							),
+					by = c("period_dt", "simulation_id", "risk_model_id", "currency"),
+					suffix = c("_minvar", "_solution")
+			) %>%
+			dplyr::mutate(
+					reduction = 1 - (managed_solution - managed_minvar) / (market_solution -  managed_minvar)
+			)
+
+	for(minVarCurrency in minVarCurrencies) {		
+		riskPlot <- Toolbox.plotTimeSeries(
+			riskComparison %>%
+					dplyr::filter(currency == minVarCurrency),
+			"period_dt",
+			c("managed_minvar", "managed_solution", "market_solution"),
+			columnVariable = "risk_model_id",
+			rowVariable = "minvar_risk_model_id",
+			yFormat = scales::percent_format(.01),
+			title = glue::glue("ex-Ante Total Risk for Solution and Minimum Variance Portfolios ({minVarCurrency})")
+		)
+	
+		print(riskPlot)
+	}
+}
+
+```
+
+### Min Var - Reduction
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+
+if(!is.null(simulationSummary$minvar$solution$risk$summary) && nrow(simulationSummary$minvar$solution$risk$summary) > 0) {
+	Toolbox.plotTimeSeries(
+			riskComparison,
+			"period_dt",
+			"reduction",
+			columnVariable = "risk_model_id",
+			rowVariable = "minvar_risk_model_id",
+			colorVariable = "currency",
+			yFormat = scales::percent_format(.01),
+			yOriginLine = TRUE,
+			title = "ex-Ante Risk Reduction of Solution Relative to Min Var and Market",
+			footnote = "reduction = 1 - (managed_solution - managed_minvar) / (market_solution -  managed_minvar)"
+	)
+}
+```
+	
+# Portfolio Exposures
+
+## Signal {.tabset .tabset-fade}
+
+### Alpha - z-Score
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+signalVariableIDs <- paste0("model_signal_", alphaSignalIDs)
+signalERVariableIDs <- paste0("model_signal_", alphaSignalERIDs)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+		"period_dt", signalVariableIDs, 
+		dataLabels = alphaSignalIDs,
+		facetVariable = "simulation_id", 
+		title = "Active Signal Exposure - Alpha"
+)  
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+		"period_dt", 
+		simulationIDs, 
+		facetVariable = "variable_id", 
+		title = "Active Signal Exposure - Alpha"
+)  
+```			
+		
+### Alpha - ER
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+		
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalERVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+		"period_dt", 
+		signalERVariableIDs, 
+		dataLabels = alphaSignalIDs,
+		facetVariable = "simulation_id", 
+		title = "Active Expected Return - Alpha"
+)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalERVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+		"period_dt", 
+		simulationIDs, 
+		facetVariable = "variable_id", 
+		title = "Active Expected Return - Alpha"
+)  
+  
+```			
+
+### Industry
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(industrySignalIDs) > 0) {
+	signalVariableIDs <- paste0("model_signal_", industrySignalIDs)
+	signalERVariableIDs <- paste0("model_signal_", industrySignalERIDs)
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% signalVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", signalVariableIDs, 
+			dataLabels = industrySignalIDs,
+			facetVariable = "simulation_id", 
+			title = "Active Signal Exposure - Industry"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% signalERVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", signalERVariableIDs, 
+			dataLabels = industrySignalERIDs,
+			facetVariable = "simulation_id", 
+			title = "Active Expected Return - Industry"
+	))
+}  
+```			
+
+### Alpha Factors
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+alphaFactorVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "alpha_model_alpha_factor_value") %>%
+		dplyr::pull(variable_id)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% alphaFactorVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active") %>%
+			dplyr::left_join(variableMetadata, by = "variable_id"),
+		"period_dt", 
+		simulationIDs, 
+		facetVariable = "name",
+		title = "Active Alpha Factor Exposures"
+)  
+```			
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% alphaFactorVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+		"period_dt", 
+		alphaFactorVariableIDs, 
+		facetVariable = "simulation_id",
+		legendAtBottom = TRUE,
+		title = "Active Alpha Factor Exposures"
+)  
+```
+
+## Focus Variables {.tabset .tabset-fade}
+
+### Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs)) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>%
+					dplyr::filter(variable_id %in% focusVariableIDs),
+			"period_dt",
+			"active",
+			facetVariable = "variable_id", 
+			colorVariable = "simulation_id",
+			title = "Focus Variable Exposures: Active"
+	)
+}
+```
+
+### Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs)) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>%
+					dplyr::filter(variable_id %in% focusVariableIDs),
+			"period_dt",
+			"managed",
+			facetVariable = "variable_id", 
+			colorVariable = "simulation_id",
+			title = "Focus Variable Exposures: Managed"
+	)
+}
+```
+
+### Long
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs) && "long" %in% names(simulationSummary$opt$solution$exposures)) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>%
+					dplyr::filter(variable_id %in% focusVariableIDs),
+			"period_dt",
+			"long",
+			facetVariable = "variable_id", 
+			colorVariable = "simulation_id",
+			title = "Focus Variable Exposures: Long"
+	)
+}
+```
+
+### Short
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs) && "short" %in% names(simulationSummary$opt$solution$exposures)) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>%
+					dplyr::filter(variable_id %in% focusVariableIDs),
+			"period_dt",
+			"short",
+			facetVariable = "variable_id", 
+			colorVariable = "simulation_id",
+			title = "Focus Variable Exposures: Short"
+	)
+}
+```
+
+## Beta {.tabset .tabset-fade}
+
+### Predicted Market Beta - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+betaVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "risk_model_beta") %>%
+		dplyr::pull(variable_id)
+
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+		"period_dt", 
+		betaVariableIDs, 
+		facetVariable = "simulation_id", 
+		title = "Active Predicted Beta"
+)  
+
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+		"period_dt", 
+		simulationIDs, 
+		facetVariable = "variable_id", 
+		title = "Active Predicted Beta"
+)  
+```			
+
+### Predicted Market Beta - Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+		"period_dt", 
+		betaVariableIDs, 
+		facetVariable = "simulation_id", 
+		title = "Managed Predicted Beta"
+)  
+
+Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "managed"),
+		"period_dt", 
+		simulationIDs, 
+		facetVariable = "variable_id", 
+		title = "Managed Predicted Beta"
+)  
+```			
+
+### Predicted Market Beta - Long
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("long" %in% names(simulationSummary$opt$solution$exposures)) {
+	Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "long"),
+		"period_dt", 
+		betaVariableIDs, 
+		facetVariable = "simulation_id", 
+		title = "Long Predicted Beta"
+	)  
+
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "long"),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "variable_id", 
+			title = "Long Predicted Beta"
+	)
+}
+```			
+
+### Predicted Market Beta - Short
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("short" %in% names(simulationSummary$opt$solution$exposures)) {
+	Toolbox.plotTimeSeries(
+		simulationSummary$opt$solution$exposures %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% betaVariableIDs
+			) %>%
+			reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "short"),
+		"period_dt", 
+		betaVariableIDs, 
+		facetVariable = "simulation_id", 
+		title = "Short Predicted Beta"
+	)  
+	
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "short"),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "variable_id", 
+			title = "Short Predicted Beta"
+	)
+}
+```			
+
+## Beta Decomposition {.tabset .tabset-fade}
+
+### Beta Decomposition - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+for(riskModelMarket in riskModelMarkets) {
+	for(numeraire in effNumeraires) {
+		plot <- Toolbox.plotTimeSeries(
+				compareExposures %>%
+						dplyr::filter(
+								source == "risk_model_betadecomp" &
+										market == riskModelMarket &
+										currency == numeraire &
+										group %in% c("residual_mcap", "industry_mcap", "country_mcap")
+						),
+				"period_dt", 
+				"active_opt",
+				colorVariable = "group",
+				rowVariable = "simulation_id", 
+				columnVariable = "model", 
+				title = glue::glue("Beta Decomposition - Active\n{numeraire} {riskModelMarket}")
+		)
+		
+		print(plot)
+	}
+}
+```
+
+### Beta Decomposition - Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+for(riskModelMarket in riskModelMarkets) {
+	for(numeraire in effNumeraires) {
+		plot <- Toolbox.plotTimeSeries(
+				compareExposures %>%
+						dplyr::filter(
+								source == "risk_model_betadecomp" &
+										market == riskModelMarket &
+										currency == numeraire &
+										group %in% c("residual_mcap", "industry_mcap", "country_mcap")
+						),
+				"period_dt", 
+				"managed_opt",
+				colorVariable = "group",
+				rowVariable = "simulation_id", 
+				columnVariable = "model", 
+				title = glue::glue("Beta Decomposition - Managed\n{numeraire} {riskModelMarket}")
+		)
+		
+		print(plot)
+	}
+}
+```
+
+## Macroeconomic Beta {.tabset .tabset-fade}
+
+### Macroeconomic Beta - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+betaMacroVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "beta_macroeconomic") %>%
+		dplyr::pull(variable_id)
+
+if(length(betaMacroVariableIDs) > 0) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaMacroVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", 
+			betaMacroVariableIDs, 
+			facetVariable = "simulation_id", 
+			title = "Active Macroeconomic Beta"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaMacroVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "variable_id", 
+			title = "Active Macroeconomic Beta"
+	))
+}
+```			
+
+### Macroeconomic Beta - Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+betaMacroVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "beta_macroeconomic") %>%
+		dplyr::pull(variable_id)
+
+if(length(betaMacroVariableIDs) > 0) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaMacroVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+			"period_dt", 
+			betaMacroVariableIDs, 
+			facetVariable = "simulation_id", 
+			title = "Managed Macroeconomic Beta"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaMacroVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "managed"),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "variable_id", 
+			title = "Managed Macroeconomic Beta"
+	))
+}
+```			
+
+## Country {.tabset .tabset-fade}
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if (length(countries) > 0) {
+	countryVariableIDs <- paste0("country_", countries)
+
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% countryVariableIDs
+				) %>% 
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", countryVariableIDs, 
+			dataLabels = countries,
+			facetVariable = "simulation_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Active Country Exposure"
+	)
+}
+```
+
+### Managed by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if (length(countries) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% countryVariableIDs
+				) %>%  
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+			"period_dt", countryVariableIDs, 
+			dataLabels = countries,
+			facetVariable = "simulation_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Managed Country Exposure"
+	)  
+}
+```
+
+### Active by Country
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if (length(countries) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% countryVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+			"period_dt", simulationIDs, 
+			facetVariable = "variable_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Active Country Exposure"
+	)
+}
+```
+		
+### Managed by Country
+		
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if (length(countries) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% countryVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "managed"),
+			"period_dt", simulationIDs, 
+			facetVariable = "variable_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Managed Country Exposure"
+	)
+}  
+```			
+
+## Region {.tabset .tabset-fade}	
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if (length(regions) > 0) {
+	regionVariableIDs <- paste0("region_", regions)
+
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% regionVariableIDs
+				) %>% 
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", regionVariableIDs, 
+			dataLabels = regions,
+			facetVariable = "simulation_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Active Region Exposure"
+	)
+}
+```
+		
+### Managed by Simulation
+		
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+if (length(regions) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% regionVariableIDs
+				) %>%  
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+			"period_dt", regionVariableIDs, 
+			dataLabels = regions,
+			facetVariable = "simulation_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Managed Region Exposure"
+	)
+} 
+```
+
+### Active by Region
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+if (length(regions) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% regionVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "active"),
+			"period_dt", simulationIDs, 
+			facetVariable = "variable_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Active Region Exposure"
+	)
+}
+```
+		
+### Managed by Region 
+		
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+if (length(regions) > 0) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$exposures %>%
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% regionVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + variable_id ~ simulation_id, value.var = "managed"),
+			"period_dt", simulationIDs, 
+			facetVariable = "variable_id", 
+			yFormat = scales::percent_format(.01),
+			title = "Managed Region Exposure"
+	)
+}  
+```			
+
+## Industry - GICS {.tabset .tabset-fade}	
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+	gics6Mapping <- gicsMapping %>%
+		dplyr::filter(nchar(sector_id) == 6) %>%
+		dplyr::mutate(variable_id = paste0("gics6_", sector_id))
+		
+	gics6ExpData <- simulationSummary$opt$solution$exposures %>%
+		dplyr::inner_join(gics6Mapping, by = "variable_id")
+		
+	gicsUnique <- gics6ExpData %>%
+		dplyr::select(variable_id, sector_id, name_short) %>%
+		dplyr::distinct(variable_id, .keep_all = TRUE)
+		
+	gics6VariableIDs <- gicsUnique$variable_id
+	gics6Names <- gicsUnique$name_short
+		
+	Toolbox.plotTimeSeries(gics6ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+				reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", 
+			gics6VariableIDs, 
+			dataLabels = gics6Names,
+			facetVariable = "simulation_id",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active GICS6 Exposure"
+	)
+```
+			
+### Managed by Simulation 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics6ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+			"period_dt", 
+			gics6VariableIDs, 
+			dataLabels = gics6Names,
+			facetVariable = "simulation_id", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed GICS6 Exposure"
+	)  
+```
+
+### Active by Industry
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics6ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + name_short ~ simulation_id, value.var = "active", fun.aggregate = sum),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "name_short", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active GICS6 Exposure"
+	)
+```
+			
+### Managed by Industry 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics6ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + name_short ~ simulation_id, value.var = "managed", fun.aggregate = sum),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "name_short", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed GICS6 Exposure"
+	)
+			
+```			
+
+## Sector - GICS  {.tabset .tabset-fade}
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+	gics2Mapping <- gicsMapping %>%
+		dplyr::filter(nchar(sector_id) == 2) %>%
+		dplyr::mutate(variable_id = paste0("gics2_", sector_id))
+		
+	gics2ExpData <- simulationSummary$opt$solution$exposures %>%
+		dplyr::inner_join(gics2Mapping, by = "variable_id")
+		
+	gicsUnique <- gics2ExpData %>%
+		dplyr::select(variable_id, sector_id, name_short) %>%
+		dplyr::distinct(variable_id, .keep_all = TRUE)
+		
+	gics2VariableIDs <- gicsUnique$variable_id
+	gics2Names <- gicsUnique$name_short
+		
+	Toolbox.plotTimeSeries(gics2ExpData %>% 
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "active"),
+			"period_dt", 
+			gics2VariableIDs, 
+			dataLabels = gics2Names,
+			facetVariable = "simulation_id", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active GICS2 Exposure"
+	)
+```
+			
+### Managed by Simulation 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics2ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + simulation_id ~ variable_id, value.var = "managed"),
+			"period_dt", 
+			gics2VariableIDs, 
+			dataLabels = gics2Names,
+			facetVariable = "simulation_id", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed GICS2 Exposure"
+	)  
+```
+
+### Active by Sector
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics2ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + name_short ~ simulation_id, value.var = "active", fun.aggregate = sum),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "name_short", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active GICS2 Exposure"
+	)
+```
+			
+### Managed by Sector 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(gics2ExpData %>%
+					dplyr::filter(simulation_id %in% simulationIDs) %>% 
+					reshape2::dcast(period_dt + name_short ~ simulation_id, value.var = "managed", fun.aggregate = sum),
+			"period_dt", 
+			simulationIDs, 
+			facetVariable = "name_short", 
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed GICS2 Exposure"
+	)
+			
+```			
+
+## Industry - Risk Model {.tabset .tabset-fade}	
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor" & 
+							type == "industry" & 
+							model %in% baseRiskModelIDs
+							
+					),
+			"period_dt", 
+			"active_opt",			
+			facetVariable = "simulation_id",
+			colorVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active Risk Model Industry Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)
+```
+			
+### Managed by Simulation 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor" & 
+							type == "industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"managed_opt",			
+			facetVariable = "simulation_id",
+			colorVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed Risk Model Industry Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)  
+```
+
+### Active by Industry
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor" & 
+							type == "industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"active_opt",			
+			colorVariable = "simulation_id",
+			facetVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active Risk Model Industry Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)
+```
+			
+### Managed by Industry 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor" & 
+							type == "industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"managed_opt",			
+			colorVariable = "simulation_id",
+			facetVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed Risk Model Industry Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)		
+```
+
+
+
+## Sector - Risk Model {.tabset .tabset-fade}	
+
+### Active by Simulation
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor_groups" & 
+							type == "group_industry" & 
+							model %in% baseRiskModelIDs
+							
+					),
+			"period_dt", 
+			"active_opt",			
+			facetVariable = "simulation_id",
+			colorVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active Risk Model Sector Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)
+```
+			
+### Managed by Simulation 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor_groups" & 
+							type == "group_industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"managed_opt",			
+			facetVariable = "simulation_id",
+			colorVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed Risk Model Sector Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)  
+```
+
+### Active by Sector
+
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor_groups" & 
+							type == "group_industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"active_opt",			
+			colorVariable = "simulation_id",
+			facetVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Active Risk Model Sector Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)
+```
+			
+### Managed by Sector 
+			
+```{r dev = 'png', fig.width = 10, fig.height = 10, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}	
+	Toolbox.plotTimeSeries(
+			compareExposures %>%
+					dplyr::filter(
+							source == "risk_model_factor_groups" & 
+							type == "group_industry" & 
+							model %in% baseRiskModelIDs
+					
+					),
+			"period_dt", 
+			"managed_opt",			
+			colorVariable = "simulation_id",
+			facetVariable = "name",
+			legendAtBottom = TRUE,
+			yFormat = scales::percent_format(.01),
+			title = "Managed Risk Model Sector Exposure",
+			footnote = glue::glue("Risk models: {paste(baseRiskModelIDs, collapse = ',')}")
+	)		
+```
+
+
+
+
+# Portfolio Quantile Weights {.tabset .tabset-fade}
+
+## Signal {.tabset .tabset-fade}
+
+### Alpha - z-Score
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+signalVariableIDs <- paste0("model_signal_", alphaSignalIDs)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalVariableIDs
+			) %>%
+			dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"managed",
+		colorVariable = "quantile",
+		columnVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Signal Quantile Weights - Managed"
+)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% signalVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"managed",
+		columnVariable = "quantile",
+		colorVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Signal Quantile Weights - Managed"
+)
+```			
+
+### Alpha - z-Score - Long
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("long" %in% names(simulationSummary$opt$solution$exposures)) {
+	signalVariableIDs <- paste0("model_signal_", alphaSignalIDs)
+	
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+			dplyr::filter(
+					simulation_id %in% simulationIDs &
+					variable_id %in% signalVariableIDs
+			) %>%
+			dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"long",
+		colorVariable = "quantile",
+		columnVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Signal Quantile Weights - Long"
+	)
+
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% signalVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"long",
+		columnVariable = "quantile",
+		colorVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Signal Quantile Weights - Long"
+	)
+}
+```			
+
+### Alpha - z-Score - Short
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("short" %in% names(simulationSummary$opt$solution$exposures)) {
+	signalVariableIDs <- paste0("model_signal_", alphaSignalIDs)
+
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% signalVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Signal Quantile Weights - Short"
+	)
+	
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% signalVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Signal Quantile Weights - Short"
+	)
+}
+```			
+
+
+
+### Industry - z-Score
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(length(industrySignalIDs) > 0) {
+	signalVariableIDs <- paste0("model_signal_", industrySignalIDs)
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% signalVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"managed",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Industry Signal Quantile Weights - Managed"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% signalVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"managed",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Industry Signal Quantile Weights - Managed"
+	))	
+}
+```		
+
+## Beta {.tabset .tabset-fade}
+
+### Predicted Market Beta - Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+betaVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "risk_model_beta") %>%
+		dplyr::pull(variable_id)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% betaVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"managed",
+		colorVariable = "quantile",
+		columnVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Predicted Market Beta Quantile Weights - Managed"
+)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% betaVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"managed",
+		columnVariable = "quantile",
+		colorVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Predicted Market Beta Quantile Weights - Managed"
+)
+```			
+
+### Predicted Market Beta - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+betaVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "risk_model_beta") %>%
+		dplyr::pull(variable_id)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% betaVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"active",
+		colorVariable = "quantile",
+		columnVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Predicted Market Beta Quantile Weights - Active"
+)
+
+Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+								variable_id %in% betaVariableIDs
+				) %>%
+				dplyr::mutate(quantile = factor(quantile)),
+		"period_dt", 
+		"active",
+		columnVariable = "quantile",
+		colorVariable = "simulation_id",
+		rowVariable = "variable_id",
+		title = "Predicted Market Beta Quantile Weights - Active"
+)
+```			
+
+### Predicted Market Beta - Long
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("long" %in% names(simulationSummary$opt$solution$quantileWeights )) {
+	betaVariableIDs <- variableMetadata %>%
+		dplyr::filter(source == "risk_model_beta") %>%
+		dplyr::pull(variable_id)
+
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% betaVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"long",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Predicted Market Beta Quantile Weights - Long"
+	)
+	
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% betaVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"long",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Predicted Market Beta Quantile Weights - Long"
+	)
+}
+```			
+
+### Predicted Market Beta - Short
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if("short" %in% names(simulationSummary$opt$solution$quantileWeights)) {
+	betaVariableIDs <- variableMetadata %>%
+			dplyr::filter(source == "risk_model_beta") %>%
+			dplyr::pull(variable_id)
+	
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% betaVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Predicted Market Beta Quantile Weights - Short"
+	)
+	
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% betaVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Predicted Market Beta Quantile Weights - Short"
+	)
+}
+```			
+
+## Focus Variables {.tabset .tabset-fade}
+
+### Variables - Managed
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs)) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"managed",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Managed"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"managed",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Managed"
+	))
+}
+```			
+
+### Variables - Active
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs)) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"active",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Active"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"active",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Active"
+	))	
+}
+```			
+
+### Variables - Long
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs) && "long" %in% names(simulationSummary$opt$solution$quantileWeights)) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"long",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Long"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"long",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Long"
+	))	
+}
+```			
+
+### Variables - Short
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(focusVariableIDs) && "short" %in% names(simulationSummary$opt$solution$quantileWeights)) {
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			colorVariable = "quantile",
+			columnVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Short"
+	))
+	
+	print(Toolbox.plotTimeSeries(simulationSummary$opt$solution$quantileWeights %>% 
+					dplyr::filter(
+							simulation_id %in% simulationIDs &
+									variable_id %in% focusVariableIDs
+					) %>%
+					dplyr::mutate(quantile = factor(quantile)),
+			"period_dt", 
+			"short",
+			columnVariable = "quantile",
+			colorVariable = "simulation_id",
+			rowVariable = "variable_id",
+			title = "Variable Quantile Weights - Short"
+	))	
+}
+```			
+
+# TC {.tabset .tabset-fade}
+
+## Diagonal
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$opt$solution$tc$diagonal)) {
+	Toolbox.plotTimeSeries(simulationSummary$opt$solution$tc$diagonal %>% 
+						dplyr::filter(simulation_id %in% simulationIDs),
+				"period_dt", 
+				"tc",
+				columnVariable = "risk_model_id",
+				colorVariable = "simulation_id",
+				rowVariable = "signal_variable_id",
+				title = "TC - Diagonal"
+	)
+}
+```				 
+
+## Full
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$opt$solution$tc$full)) {
+	allCurrencies <- unique(simulationSummary$opt$solution$tc$full$currency)
+	
+	for(theCurrency in allCurrencies) {	
+		print(Toolbox.plotTimeSeries(
+					simulationSummary$opt$solution$tc$full %>% 
+							dplyr::filter(
+									simulation_id %in% simulationIDs & 
+									currency == theCurrency
+							),
+					"period_dt", 
+					"tc",
+					columnVariable = "risk_model_id",
+					colorVariable = "simulation_id",
+					rowVariable = "signal_variable_id",
+					title = glue::glue("TC - Full - {theCurrency}")
+		))
+	}
+}
+```				 
+
+# Comparison Portfolios {.tabset .tabset-fade}
+
+## Predicted Market Beta
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$compare$exposures)) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$compare$exposures %>% 
+				dplyr::filter(
+						simulation_id %in% simulationIDs &
+						variable_id %in% betaVariableIDs
+				) %>%
+				reshape2::dcast(period_dt + simulation_id + comparison_portfolio_id ~ variable_id, value.var = "managed"),
+			"period_dt", 
+			betaVariableIDs, 
+			rowVariable = "simulation_id", 
+			columnVariable = "comparison_portfolio_id", 
+			title = "Comparison Predicted Beta"
+	)
+}
+```			
+
+
+# Trading Summary {.tabset .tabset-fade}
+
+## Turnover
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$opt$trade$summary )) {
+	Toolbox.plotTimeSeries(
+			simulationSummary$opt$trade$summary %>% 
+					dplyr::filter(simulation_id %in% simulationIDs),
+			"period_dt", 
+			"turnover",
+			colorVariable = "simulation_id",
+			yMinimum = 0, 
+			yFormat = scales::percent_format(.01),
+			title = "Turnover"
+	)
+}
+```				
+
+## Mean Turnover
+
+```{r dev = 'png', fig.width = 10, fig.height = 6, echo = FALSE, warnings = FALSE, message = FALSE, errors = FALSE , results = FALSE}
+if(!is.null(simulationSummary$opt$tradeSummary )) {
+	Toolbox.plotChart(
+			simulationSummary$opt$tradeSummary$summary %>%
+					dplyr::filter(simulation_id %in% simulationIDs),
+			"simulation_id",
+			"turnover",
+			legend = FALSE,
+			yFormat = scales::percent_format(.01),
+			labelValues = TRUE,
+			labelValueFormat = scales::percent_format(.01),
+			xAxisRotateLabels = TRUE, 
+			title = "Mean Turnover"
+	)
+}
+
+
+```				
+
+
+<!-- </div> in order to keep report metadata separate from tabs --> 
+
+</div> 
+
+`r Toolbox.reportMetadata()`

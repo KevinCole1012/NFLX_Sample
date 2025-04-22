@@ -1,4 +1,4 @@
-# NFLX_Sample
+# NFLX Sample
 
 This branch contains a sample of Kevin Cole's work. It includes R and Python code he has developed in addition to a Markdown sample. 
 
